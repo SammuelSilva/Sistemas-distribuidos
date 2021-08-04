@@ -101,7 +101,6 @@ public class PubSubClient {
 		
 		Client released = new Client(brokerAddress, brokerPort);
 		Message r_msg = released.sendReceive(msgRel);
-		System.out.println(r_msg.getContent() + "+" + r_msg.getLogId());
 	}
 
 	public void publish(String message, String brokerAddress, int brokerPort){
