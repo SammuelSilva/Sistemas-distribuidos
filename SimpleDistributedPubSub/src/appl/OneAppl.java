@@ -45,7 +45,7 @@ public class OneAppl {
 		Set<Message> logClient = client.getLogMessages();
 		
 		Iterator<Message> it = logClient.iterator();
-		System.out.print("Log Client itens: \n");
+		System.out.print("\nLog Client itens: \n");
 		while(it.hasNext()){
 			Message aux = it.next();
 			System.out.print("[Content]: " + aux.getContent() + " [LogID]: " + aux.getLogId() + " [type]: " + aux.getType() + "\n");
