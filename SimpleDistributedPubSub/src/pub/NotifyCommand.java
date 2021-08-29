@@ -2,7 +2,9 @@ package pub;
 
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.List;
 
+import core.Address;
 import core.Message;
 import core.MessageImpl;
 import core.PubSubCommand;
@@ -10,10 +12,10 @@ import core.PubSubCommand;
 public class NotifyCommand implements PubSubCommand{
 
 	@Override
-	public Message execute(Message m, SortedSet<Message> log, Set<String> subscribers) {
+	public Message execute(Message m, SortedSet<Message> log, List<String> subscribers, Address backup) {
 		Message response = new MessageImpl();
 			
-		System.out.println("Number of Log itens of an Observer " + m.getBrokerId() + " : " + log.size());
+		//System.out.println("Number of Log itens of an Observer " + m.getBrokerId() + " : " + log.size());
 
 		synchronized(log){
 			
@@ -21,12 +23,20 @@ public class NotifyCommand implements PubSubCommand{
 				String resource = m.getContent().split(" ")[1];
 				String[] clientInfo = m.getContent().split(" ")[3].split(":");
 				this.dirt(log, resource, clientInfo[0], clientInfo[1]);
+				// System.out.println("Release notified" + m.getContent());
 				response.setContent("Release notified: " + m.getContent());
 			}else{
+				// System.out.println("MEssage notified" + m.getContent());
 				response.setContent("Message notified: " + m.getContent());
 			}
 
-			log.add(m);			
+			log.add(m);
+
+			System.out.println("*******************************************************");			
+			System.out.println("Adicionou no log: " + m.getContent());
+			log.stream().forEach(l -> System.out.print(l + " "));
+			System.out.println();
+			System.out.println("*******************************************************");			
 
 			
 			response.setType("notify_ack");

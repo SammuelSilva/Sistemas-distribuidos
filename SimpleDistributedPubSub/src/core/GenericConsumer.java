@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.SortedSet;
 
 public abstract class GenericConsumer<S> extends Thread{
 	
@@ -56,5 +57,7 @@ public abstract class GenericConsumer<S> extends Thread{
 	}
 	
 	protected abstract void doSomething(S str);
+
+	public abstract SortedSet<Message> getMessages();
 
 }

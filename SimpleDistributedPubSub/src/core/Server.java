@@ -3,33 +3,63 @@ package core;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-//import java.util.List;
 import java.util.Set;
 
+import utils.Tuple;
 
 //this server represents the producer in a producer/consumer strategy
 //it receives a client socket and inserts it into a resource
 public class Server {
-	protected GenericConsumer<Socket> consumer;
+	protected PubSubConsumer<Socket> consumer;
 	protected GenericResource<Socket> resource;
+	
+	protected SyncConsumer<Tuple<Socket, Message>> syncConsumer;
+	protected GenericResource<Tuple<Socket, Message>> syncResource;
+
+	protected CommandConsumer<Tuple<Socket, Message>> commandConsumer;
+	protected GenericResource<Tuple<Socket, Message>> commandResource;
+	
 	protected int port;
 	protected ServerSocket serverSocket;
-		
-	public Server(int port){
+	protected Boolean primary;
+	protected Address address;
+
+	public Server(int port, Boolean primary, Address address) {
 		this.port = port;
-		
+		this.primary = primary;
+		this.address = address;
+
 		resource = new GenericResource<Socket>();
-		
+		syncResource = new GenericResource<Tuple<Socket, Message>>();
+		commandResource = new GenericResource<Tuple<Socket, Message>>();
 	}
 	
-		
+	public Server(int port, boolean isPrimary){
+		this(port, isPrimary, new Address(null, 0));
+	}
+	
+	public Server(int port){
+		this(port, true, new Address(null, 0));
+	}
+
 	public void begin(){
 		try{
 			
 			//just one consumer to guarantee a single
 			//log write mechanism
-			consumer = new PubSubConsumer<Socket>(resource);
+			consumer = new PubSubConsumer<Socket>(resource, commandResource, syncResource);
 			
+			commandConsumer = new CommandConsumer<>(commandResource, primary, address,
+						 consumer.getMessages(), consumer.getSubscribers());
+
+			if(!primary){
+				syncConsumer = new SyncConsumer<Tuple<Socket, Message>>(syncResource, address,
+						 consumer.getMessages(), consumer.getSubscribers());		
+				
+				syncConsumer.start();
+			}
+			
+			commandConsumer.start();
 			consumer.start();
 			
 			openServerSocket();
@@ -52,7 +82,7 @@ public class Server {
             	resource.putRegister(clientSocket);
             } catch (IOException e) {
                 if(resource.isStopped()) {
-                    //System.out.println("Stopped.") ;
+                    System.out.println("Stopped.") ;
                     return;
                 }
                 throw new RuntimeException(
@@ -61,25 +91,31 @@ public class Server {
             
             
         }
-        System.out.println("Stopped: " + port) ;
+        System.out.println("[ Server ] Stopped: " + port) ;
         
 	}	
     
     private void openServerSocket() {
         try {
             this.serverSocket = new ServerSocket(this.port);
-            System.out.println("Listening on port: " + this.port);
+            System.out.println("[ Server ] Listening on port: " + this.port);
         } catch (IOException e) {
             throw new RuntimeException("Cannot open port " + port, e);
         }
     }
     
     public void stop(){
-    	resource.stopServer(); 
+    	resource.stopServer();
+		syncResource.stopServer();
+		commandResource.stopServer();
     	listen();
     	
     	consumer.stopConsumer();
+		commandConsumer.stopConsumer();
+
     	resource.setFinished();
+		syncResource.setFinished();
+		commandResource.setFinished();
     	//consumer.interrupt();
     	try {
 			serverSocket.close();

@@ -4,7 +4,9 @@ package pub;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.List;
 
+import core.Address;
 import core.Message;
 import core.MessageImpl;
 import core.PubSubCommand;
@@ -17,7 +19,7 @@ public class ReleaseCommand implements PubSubCommand{
 	 * Change the log message to reflect the release of the resource.
 	 */
 	@Override
-	public Message execute(Message m, SortedSet<Message> log, Set<String> subscribers) {
+	public Message execute(Message m, SortedSet<Message> log, List<String> subscribers, Address backup) {
 
 		String resource = m.getContent().split(" ")[1];
 		String[] clientInfo = m.getContent().split(" ")[3].split(":");
@@ -37,15 +39,33 @@ public class ReleaseCommand implements PubSubCommand{
 		msg.setLogId(logId);
 		msg.setType("notify");
 		
+		if(!backup.empty()){
+			try {
+				Client client = new Client(backup.getIp(), backup.getPort());
+				Message backupMessage = new MessageImpl();
+				backupMessage.setLogId(m.getLogId());
+				backupMessage.setType("msgSync");
+				backupMessage.setContent(m.getType() + "=>" + m.getContent());
+				backupMessage.setBrokerId(m.getBrokerId());
+				client.sendReceive(backupMessage);
+			} catch (Exception e) {
+				System.out.println("[ Broker ] Removing Backup");
+				backup.setIp(null);			
+			}
+		}
 		
 		CopyOnWriteArrayList<String> subscribersCopy = new CopyOnWriteArrayList<String>();
 		subscribersCopy.addAll(subscribers);
-		for(String aux:subscribersCopy){
-			String[] ipAndPort = aux.split(":");
-			Client client = new Client(ipAndPort[0], Integer.parseInt(ipAndPort[1]));
-			msg.setBrokerId(m.getBrokerId());
-			Message cMsg = client.sendReceive(msg);
-			if(cMsg == null) subscribers.remove(aux);
+		try{
+			for(String aux:subscribersCopy){
+				String[] ipAndPort = aux.split(":");
+				Client client = new Client(ipAndPort[0], Integer.parseInt(ipAndPort[1]));
+				msg.setBrokerId(m.getBrokerId());
+				Message cMsg = client.sendReceive(msg);
+				if(cMsg == null) subscribers.remove(aux);
+			}
+		}catch(Exception e){
+			e.printStackTrace();
 		}
 
 		response.setContent("Released: " + resource);
@@ -60,7 +80,6 @@ public class ReleaseCommand implements PubSubCommand{
 		 * function to localize log to be released and 
 		 */
 		for(Message lg: log_set){
-			
 			if(lg.getType().equals("acq")){
 				if(lg.getContent().split("->")[0].split(" ")[0].equals("ACQ") && lg.getContent().split("->")[0].split(" ")[1].equals(resource)){
 					lg.setContent("FIN " + resource + " -> " + clientAddr + ":" + clientPort);
