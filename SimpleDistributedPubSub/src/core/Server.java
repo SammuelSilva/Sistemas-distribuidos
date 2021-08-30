@@ -82,7 +82,7 @@ public class Server {
             	resource.putRegister(clientSocket);
             } catch (IOException e) {
                 if(resource.isStopped()) {
-                    System.out.println("Stopped.") ;
+                    System.out.println("[ Server ] Stopped.") ;
                     return;
                 }
                 throw new RuntimeException(

@@ -38,9 +38,9 @@ public class BackupSubCommand implements PubSubCommand{
 			backup.setIp(ipAndPort[0]);
 			backup.setPort(Integer.parseInt(ipAndPort[1]));
 			
+			System.out.println("[ Broker ] Backup not found! Start to synchronize.");
 			response.setContent("Backup added: " + m.getContent());
 
-			System.out.println("[ Broker ] Backup not found! Start to synchronize.");
 			//start a client to send all existing log messages
 			//to the backup
 			if(!log.isEmpty()){

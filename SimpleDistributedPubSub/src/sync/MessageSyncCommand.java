@@ -29,9 +29,9 @@ public class MessageSyncCommand implements PubSubCommand{
 		}
 		
 		if (m.getType().equals("rel")) {
-			System.out.println("----------------------===============================-----------------------");
-			System.out.println("Received a release message: " + m.getContent());
-			System.out.println("----------------------===============================-----------------------");
+			//System.out.println("----------------------===============================-----------------------");
+			//System.out.println("Received a release message: " + m.getContent());
+			//System.out.println("----------------------===============================-----------------------");
 
 			String resource = m.getContent().split(" ")[1];
 			String[] clientInfo = m.getContent().split(" ")[3].split(":");

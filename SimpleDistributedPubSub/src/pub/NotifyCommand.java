@@ -32,11 +32,11 @@ public class NotifyCommand implements PubSubCommand{
 
 			log.add(m);
 
-			System.out.println("*******************************************************");			
-			System.out.println("Adicionou no log: " + m.getContent());
-			log.stream().forEach(l -> System.out.print(l + " "));
-			System.out.println();
-			System.out.println("*******************************************************");			
+			//System.out.println("*******************************************************");			
+			//System.out.println("Adicionou no log: " + m.getContent());
+			//log.stream().forEach(l -> System.out.print(l + " "));
+			//System.out.println();
+			//System.out.println("*******************************************************");			
 
 			
 			response.setType("notify_ack");

@@ -44,7 +44,7 @@ public class CommandConsumer<S extends Tuple<Socket, Message>> extends GenericCo
         Socket key = tuple.getKey();
         Message value = tuple.getValue();
 
-        System.out.println("CommandConsumer: " + value + " " + key + " " + !isPrimary + " " + value.getType());
+        //System.out.println("CommandConsumer: " + value + " " + key + " " + !isPrimary + " " + value.getType());
         Message response = new MessageImpl();
 
         if(!isPrimary && value.getType().equals("recover")) {
@@ -52,15 +52,15 @@ public class CommandConsumer<S extends Tuple<Socket, Message>> extends GenericCo
         }
             
         if (!isPrimary) {
-			System.out.println("[BACKUP] Sending the message from " +  value.getType()  + " to the Main Broker");
+			System.out.println("[ Backup ] Sending the message from " +  value.getType()  + " to the Main Broker");
             try {
-                System.out.println("[BACKUP] Ip and Port: " +  primary.getIp() + " " + primary.getPort());
+                System.out.println("[Backup] Ip and Port: " +  primary.getIp() + " " + primary.getPort());
                 Client client = new Client(primary.getIp(), primary.getPort());
                 response = client.sendReceive(value);
             } catch (IOException e) {
-                System.out.println("[BACKUP] Not Able to Connect with the Main Broker. Changing to backup " + value.getType());
+                System.out.println("[Backup] Not Able to Connect with the Main Broker. Changing to backup " + value.getType());
 				changePrimary();
-				System.out.println("[BACKUP] Current Log id: " + uniqueLogId);
+				System.out.println("[Backup] Current Log id: " + uniqueLogId);
 				response = executeCommand(value);
             }
 
@@ -92,7 +92,7 @@ public class CommandConsumer<S extends Tuple<Socket, Message>> extends GenericCo
             message.setLogId(uniqueLogId);
         }
 
-        System.out.println("TYPE: " + message.getType());
+        //System.out.println("TYPE: " + message.getType());
         response = commands.get(message.getType()).execute(message, log, subscribers, backup);
 
         if(!(message.getType().equals("notify"))) {

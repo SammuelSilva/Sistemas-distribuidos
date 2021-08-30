@@ -64,7 +64,7 @@ public class Broker {
 				System.out.println("[ Sys ] PORT: " + primaryIP + ":" + primaryPort);
 				Client sub = new Client(primaryIP, primaryPort);
 				sendRecv_asw = sub.sendReceive(msgB);
-				System.out.println("[ Sys ] Type:" + sendRecv_asw.getType());
+				//System.out.println("[ Sys ] Type:" + sendRecv_asw.getType());
 			} catch (Exception e) {
 				Bck_Activated = false;
 			}
@@ -80,7 +80,7 @@ public class Broker {
 			Boolean shutdown = reader.next().toLowerCase().equals("y");
 			
 			if (shutdown){
-				System.out.println("Broker stopped...");
+				System.out.println("[ Sys ] Broker stopped...");
 				s.stop();
 				brokerThread.interrupt();
 			}

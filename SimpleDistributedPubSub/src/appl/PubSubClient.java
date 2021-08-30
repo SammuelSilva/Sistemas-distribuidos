@@ -60,7 +60,7 @@ public class PubSubClient {
 			Client subscriber = new Client(brokerAddress, brokerPort);
 			System.out.println("[ Sys ] Subscribing to broker " + brokerPort + " at " + msgBroker.getContent());
 			Message response = subscriber.sendReceive(msgBroker);
-			System.out.println("[ Debug ] " + response.getContent().isEmpty());
+			//System.out.println("[ Debug ] " + response.getContent().isEmpty());
 			if (response.getType().equals("sub_ack")){
 				String backup = response.getContent();
 				this.brokerAddresses.put(brokerName, new Tuple<>(new Address(brokerAddress, brokerPort), 
@@ -111,9 +111,9 @@ public class PubSubClient {
 							if(firstAquired != null){
 								if(firstAquired.getLogId() != id){
 									try {
-										System.out.println("Waiting...");
+										System.out.println("[ Sys ] Waiting...");
 										logs.wait();
-										System.out.println("Woke up!");
+										System.out.println("[ Sys ] Woke up!");
 									} catch (InterruptedException e) {
 										e.printStackTrace();
 									}
@@ -319,9 +319,9 @@ public class PubSubClient {
 	}
 
 	public void useResource(String cred) throws InterruptedException {
-		System.out.println(" [ Debug ] Using resource: "  +  cred);
+		//System.out.println(" [ Debug ] Using resource: "  +  cred);
 		Thread.sleep(4000);
-		System.out.println(" [ Debug ] Finished resource usage: "  + cred);
+		//System.out.println(" [ Debug ] Finished resource usage: "  + cred);
 	}	
 
 		// manda o próximo broker da tupla virar primário, mesmo sem ele saber qual é o primário.
